@@ -15,6 +15,7 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 def get_args():
     parser = argparse.ArgumentParser(description="Animals classifier")
     parser.add_argument("--data_path", type=str, default="Data/dataset/voc", help="the root folder of the data")
+    parser.add_argument("--type_data", type=str, default='voc', help = 'data_name') # voc, football, volleyball, other
     parser.add_argument("--epochs", default=500, type=int, help="Total number of epochs")
     parser.add_argument("--batch_size", default=4, type=int)
     parser.add_argument("--image_size", default=416, type=int)
@@ -50,15 +51,19 @@ def train(args):
                   std=[0.229, 0.224, 0.225]),
     ])
 
-    if args.data_path == "Data/dataset/voc":
+    if args.type_data == 'voc':
         train_set = VOCDataset(root=args.data_path, year="2007", image_set="train", download=False, transform=train_transform)
         val_set = VOCDataset(root=args.data_path, year="2007", image_set="val", download=False, transform=val_transform)
-    elif args.data_path == "Data/dataset/football":
-        train_set = FootballDataset(train_transform, mode = 'Train')
-        val_set = FootballDataset(val_transform, mode = 'Test')
-    elif args.data_path == "Data/dataset/volleyball":
-        train_set = VolleyballDataset(train_transform, mode = 'Train')
-        val_set = VolleyballDataset(val_transform, mode = 'Test')
+    elif args.type_data == "football":
+        train_set = FootballDataset(args.data_path ,train_transform, mode = 'Train')
+        val_set = FootballDataset(args.data_path, val_transform, mode = 'Test') 
+    elif args.type_data == "volleyball":
+        train_set = VolleyballDataset(args.data_path, train_transform, mode = 'Train')
+        val_set = VolleyballDataset(args.data_path, val_transform, mode = 'Test')
+    else: # other 
+        train_set = VolleyballDataset(args.data_path, train_transform, mode = 'Train')
+        val_set = VolleyballDataset(args.data_path, val_transform, mode = 'Test')
+
 
     train_params = {
         "batch_size": args.batch_size,
@@ -125,7 +130,8 @@ def train(args):
 
 
 if __name__ == '__main__':
-
+    # args=get_args()
+    # print(vars(args))
     train(args=get_args())
 
 

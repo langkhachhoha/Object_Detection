@@ -12,26 +12,29 @@ from PIL import Image
 
 # volleyball dataset
 class VolleyballDataset(Dataset):
-    def __init__(self, transform=None, mode = 'Train'):
+    def __init__(self, data_path, transform=None, mode = 'Train'):
+        # Data/dataset/volleyball/
         if transform is None:
             self.transform = Compose([])
         else:
             self.transform = transform
+        if data_path[-1] != '/':
+            data_path += '/'
+        self.data_path = data_path
 
-
-        with open("Data/dataset/volleyball/classes.txt") as f:
+        with open(os.path.join(self.data_path, "classes.txt")) as f:
             labels = f.readlines()
         self.labels = [label.strip() for label in labels]
         self.image = []
-        for file in os.listdir("Data/dataset/volleyball/"):
+        for file in os.listdir(self.data_path):
             if file.endswith(".jpg"):
-                self.image.append("Data/dataset/volleyball/" + file)
+                self.image.append(self.data_path + file)
         l = len(self.image)
         if mode == 'Train':
             self.image = self.image[:int(0.8*l)]
         else:
             self.image = self.image[int(0.8*l):]
-        self.categories = ['Player', 'Referee', 'Ball']
+        self.categories = self.labels
 
     def __len__(self):
         return len(self.image)
@@ -72,26 +75,29 @@ class VolleyballDataset(Dataset):
 
 # volleyball dataset
 class FootballDataset(Dataset):
-    def __init__(self, transform=None, mode = 'Train'):
+    def __init__(self, data_path, transform=None, mode = 'Train'):
         if transform is None:
             self.transform = Compose([])
         else:
             self.transform = transform
+        if data_path[-1] != '/':
+            data_path += '/'
+        self.data_path = data_path
 
 
-        with open("Data/dataset/football/classes.txt") as f:
+        with open(os.path.join(self.data_path, "classes.txt")) as f:
             labels = f.readlines()
         self.labels = [label.strip() for label in labels]
         self.image = []
-        for file in os.listdir("Data/dataset/football/"):
+        for file in os.listdir(self.data_path):
             if file.endswith(".jpeg"):
-                self.image.append("Data/dataset/football/" + file)
+                self.image.append(self.data_path + file)
         l = len(self.image)
         if mode == 'Train':
             self.image = self.image[:int(0.8*l)]
         else:
             self.image = self.image[int(0.8*l):]
-        self.categories = ['Ball', 'Player']
+        self.categories = self.labels 
 
     def __len__(self):
         return len(self.image)
@@ -162,14 +168,16 @@ class VOCDataset(VOCDetection):
         return image, targets
 
 if __name__ == '__main__':
-    idx = 1
+    idx = 13
+    data_path = "Data/dataset/football/"
     train_transform = Compose([
         # Resize((416, 416)),
         ToTensor(),
         Normalize(mean=[0.485, 0.456, 0.406],
                   std=[0.229, 0.224, 0.225]),
     ])
-    data = FootballDataset(train_transform, mode='Test')
+    data = FootballDataset(data_path, train_transform,  mode='Train')
+    print(len(data))
     imgg, target = data[idx]
     cv2.imwrite('Data/test.jpeg', cv2.cvtColor(np.array(imgg).transpose((1,2,0)) * 255., cv2.COLOR_RGB2BGR))
 
